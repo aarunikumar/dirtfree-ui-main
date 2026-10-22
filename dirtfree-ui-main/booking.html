@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Booking | DirtFree</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .booking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .booking-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .booking-form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-form-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4A90E2;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .nav-location-pill {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #eef6ff;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .nav-location-pill.show {
+            display: inline-flex;
+        }
+
+        .booking-location-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f8fbff;
+        }
+
+        .booking-location-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0;
+            margin-bottom: 4px;
+        }
+
+        .booking-location-value {
+            color: #1a1a1a;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .booking-location-change {
+            color: #4A90E2;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .booking-form-section .input-group {
+            margin-bottom: 20px;
+        }
+
+        .booking-form-section label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .booking-form-section input,
+        .booking-form-section select,
+        .booking-form-section textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .booking-form-section textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .booking-form-section .form-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .booking-form-section .btn-back {
+            flex: 1;
+            padding: 14px 24px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .booking-form-section .btn-back:hover {
+            border-color: #4A90E2;
+            color: #4A90E2;
+        }
+
+        .booking-form-section .btn-place-order {
+            flex: 1;
+            background: #00A676;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .booking-form-section .btn-place-order:hover {
+            background: #008a62;
+            transform: translateY(-2px);
+        }
+
+        .cart-preview {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 100px;
+        }
+
+        .cart-preview h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-preview-item {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            border-left: 3px solid #4A90E2;
+        }
+
+        .cart-preview-item-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .cart-preview-item-details {
+            color: #666;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .cart-preview-item-price {
+            color: #00A676;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .cart-total {
+            border-top: 2px solid #e0e0e0;
+            padding-top: 16px;
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .cart-total-amount {
+            color: #00A676;
+            font-size: 18px;
+        }
+
+        .empty-cart-message {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(74, 144, 226, 0.14), transparent 34%),
+                linear-gradient(180deg, #f7f9fc 0%, #ffffff 48%, #f8fafc 100%);
+        }
+
+        .booking-container {
+            padding: 56px 20px 72px;
+        }
+
+        .booking-form-section,
+        .cart-preview {
+            border: 1px solid #e4e7ec;
+            border-radius: 18px;
+            box-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+        }
+
+        .booking-form-section h2,
+        .cart-preview h3 {
+            color: #101828;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.22);
+        }
+
+        .nav-location-pill,
+        .booking-location-banner {
+            background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(0, 166, 118, 0.1));
+            border: 1px solid rgba(74, 144, 226, 0.18);
+            color: #357ABD;
+        }
+
+        .booking-location-value {
+            color: #101828;
+        }
+
+        .booking-location-change {
+            color: #357ABD;
+        }
+
+        .booking-form-section input,
+        .booking-form-section select,
+        .booking-form-section textarea {
+            border-color: #e4e7ec;
+            border-radius: 10px;
+            background: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .booking-form-section input:focus,
+        .booking-form-section select:focus,
+        .booking-form-section textarea:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.12);
+            outline: none;
+        }
+
+        .booking-form-section .btn-back,
+        .booking-form-section .btn-place-order {
+            border-radius: 10px;
+        }
+
+        .booking-form-section .btn-place-order {
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.22);
+        }
+
+        .booking-form-section .btn-place-order:hover {
+            background: linear-gradient(135deg, #00A676 0%, #008a62 100%);
+            box-shadow: 0 12px 26px rgba(0, 166, 118, 0.24);
+        }
+
+        .cart-preview-item {
+            background: #f8fafc;
+            border: 1px solid #e4e7ec;
+            border-left: 4px solid #4A90E2;
+            border-radius: 10px;
+        }
+
+        .cart-preview-item-price,
+        .cart-total-amount {
+            color: #357ABD;
+        }
+
+        @media (max-width: 768px) {
+            .booking-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-preview {
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-location-banner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.html" class="logo-link">
+                <div class="logo">
+                    <div class="logo-img">
+                        <svg viewBox="0 0 100 100" width="35" height="35">
+                            <circle cx="50" cy="50" r="48" fill="#4A90E2" />
+                            <path d="M50 20 L50 70 M30 70 L70 70 M35 75 L65 75 M40 80 L60 80" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="brand-name">DirtFree</span>
+                </div>
+            </a>
+
+            <nav class="nav-menu">
+                <span class="nav-location-pill" id="navBookingLocation">Location</span>
+                <a href="index.html">Home</a>
+                <a href="index.html#services">Services</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="booking-container">
+        <div class="booking-grid">
+            <div class="booking-form-section">
+                <h2>
+                    <div class="section-number">2</div>
+                    Booking Details
+                </h2>
+
+                <div class="booking-location-banner" id="bookingLocationBanner">
+                    <div>
+                        <div class="booking-location-label">Booking location</div>
+                        <div class="booking-location-value" id="bookingLocationValue">Select a location</div>
+                    </div>
+                    <a href="index.html" class="booking-location-change">Change location</a>
+                </div>
+
+                <form id="finalBookingForm">
+                    <div class="input-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="userName" placeholder="Full name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Phone Number *</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-weight: 600; color: #333;">+91</span>
+                            <input type="tel" id="userPhone" placeholder="Enter 10 digit number" style="flex: 1;" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email Address *</label>
+                         <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="email" id="userEmail" placeholder="example@domain.com" style="flex: 1;" required>
+                        </div>
+                    </div>               
+
+                    <div class="input-group">
+                        <label>Full Address *</label>
+                        <textarea id="userAddress" placeholder="Flat No, Building, Landmark, City" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Preferred Date *</label>
+                            <input type="date" id="prefDate" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Preferred Time Slot *</label>
+                            <select id="prefSlot" required>
+                                <option value="">Select a slot</option>
+                                <option value="Morning (9 AM - 12 PM)" data-start-hour="9">Morning (9 AM - 12 PM)</option>
+                                <option value="Afternoon (1 PM - 4 PM)" data-start-hour="13">Afternoon (1 PM - 4 PM)</option>
+                                <option value="Evening (5 PM - 8 PM)" data-start-hour="17">Evening (5 PM - 8 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <a href="service.html" class="btn-back">← Back</a>
+                        <button type="submit" class="btn-place-order">Place Order →</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="cart-preview">
+                <h3>📦 Cart Summary</h3>
+                <div id="cartPreviewContainer"></div>
+                <div class="cart-total">
+                    <span>Total</span>
+                    <span class="cart-total-amount" id="cartTotalAmount">₹0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/supabase-config.js"></script>
+    <script src="/cart.js"></script>
+    <script>
+        // Render cart preview on the right side
+        function renderBookingLocation() {
+            const location = cart.getLocation();
+            const locationValue = document.getElementById('bookingLocationValue');
+            const navLocation = document.getElementById('navBookingLocation');
+
+            if (location) {
+                locationValue.textContent = location;
+                navLocation.textContent = `Location: ${location}`;
+                navLocation.classList.add('show');
+            } else {
+                locationValue.textContent = 'Please select a location before booking';
+                navLocation.classList.remove('show');
+            }
+        }
+
+        function renderCartPreview() {
+            const container = document.getElementById('cartPreviewContainer');
+            const cartItems = cart.getCart();
+
+            if (cartItems.length === 0) {
+                container.innerHTML = '<div class="empty-cart-message">🛒 Your cart is empty</div>';
+                document.getElementById('cartTotalAmount').textContent = '₹0';
+                return;
+            }
+
+            let html = '';
+            cartItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                html += `
+                    <div class="cart-preview-item">
+                        <div class="cart-preview-item-name">${item.tier}</div>
+                        <div class="cart-preview-item-details">${item.service}</div>
+                        <div class="cart-preview-item-details">Qty: ${item.quantity} × ₹${item.price}</div>
+                        <div class="cart-preview-item-price">₹${itemTotal}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('cartTotalAmount').textContent = `₹${cart.getCartTotal()}`;
+        }
+
+        function buildCartSummary(cartItems) {
+            return cartItems.map((item) => {
+                const itemTotal = item.price * item.quantity;
+                return `${item.tier} (${item.quantity}x Rs.${item.price}) = Rs.${itemTotal}`;
+            }).join('\n');
+        }
+
+        function saveOrderBackup(orderData) {
+            const storageKey = 'dirtfree_order_history';
+            const existingOrders = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            existingOrders.push(orderData);
+            localStorage.setItem(storageKey, JSON.stringify(existingOrders));
+        }
+
+        function getLocalDateValue(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function setupBookingAvailability() {
+            const dateInput = document.getElementById('prefDate');
+            const slotSelect = document.getElementById('prefSlot');
+            const todayValue = getLocalDateValue();
+
+            dateInput.min = todayValue;
+            if (!dateInput.value || dateInput.value < todayValue) {
+                dateInput.value = todayValue;
+            }
+
+            function updateAvailableSlots() {
+                const currentTodayValue = getLocalDateValue();
+                dateInput.min = currentTodayValue;
+
+                if (dateInput.value && dateInput.value < currentTodayValue) {
+                    dateInput.value = currentTodayValue;
+                }
+
+                const selectedDate = dateInput.value;
+                const now = new Date();
+                const isToday = selectedDate === currentTodayValue;
+
+                Array.from(slotSelect.options).forEach((option) => {
+                    if (!option.dataset.startHour) return;
+
+                    const startHour = Number(option.dataset.startHour);
+                    const isPastSlot = isToday && now.getHours() >= startHour;
+                    option.disabled = isPastSlot;
+                    option.textContent = isPastSlot
+                        ? `${option.value} - unavailable today`
+                        : option.value;
+                });
+
+                if (slotSelect.selectedOptions[0]?.disabled) {
+                    slotSelect.value = '';
+                }
+            }
+
+            dateInput.addEventListener('change', updateAvailableSlots);
+            updateAvailableSlots();
+        }
+
+        function validateBookingAvailability() {
+            const dateInput = document.getElementById('prefDate');
+            const slotSelect = document.getElementById('prefSlot');
+            const todayValue = getLocalDateValue();
+
+            if (dateInput.value < todayValue) {
+                alert('Please choose today or a future date.');
+                dateInput.value = todayValue;
+                dateInput.focus();
+                return false;
+            }
+
+            const selectedOption = slotSelect.selectedOptions[0];
+            if (!selectedOption || !selectedOption.value || selectedOption.disabled) {
+                alert('Please choose an available time slot.');
+                slotSelect.value = '';
+                slotSelect.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        async function submitOrderToSheet(orderData) {
+            const params = new URLSearchParams();
+
+            Object.entries(orderData).forEach(([key, value]) => {
+                params.append(key, typeof value === 'string' ? value : JSON.stringify(value));
+            });
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyLT_KKbmiKTGkGH68Y8SMtZBTCZN_ZW2UtP0K7mJoieAFonc0BAoHo9i6Ytr573JhB/exec';
+
+            await fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: params
+            });
+        }
+
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('finalBookingForm');
+
+            // Initial cart preview render
+            renderBookingLocation();
+            renderCartPreview();
+            setupBookingAvailability();
+
+            const submitBooking = async function(e) {
+                if (e) e.preventDefault();
+
+                if (!cart.isAuthenticated()) {
+                    cart.queueAfterAuth(() => {
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        }
+                    });
+                    cart.showAuthModal('signin');
+                    return;
+                }
+
+                const location = cart.getLocation();
+                if (!location) {
+                    alert('Please select a location first!');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                if (cart.getCart().length === 0) {
+                    alert('Your cart is empty. Please add services first.');
+                    return;
+                }
+
+                if (!validateBookingAvailability()) {
+                    return;
+                }
+
+                // Collect form data
+                const name = document.getElementById('userName').value;
+                const phone = document.getElementById('userPhone').value;
+                const address = document.getElementById('userAddress').value;
+                const date = document.getElementById('prefDate').value;
+                const slot = document.getElementById('prefSlot').value;
+
+                // Get cart items
+                const cartItems = cart.getCart();
+                const cartSummary = buildCartSummary(cartItems);
+                const totalAmount = cart.getCartTotal();
+                const orderId = `DF-${Date.now()}`;
+                const bookingTimestamp = new Date().toISOString();
+                const locationMap = {
+                    'Ahmedabad': '917828597277',
+                    'Betul': '919691998370',
+                    'Chennai': '917470625893',
+                    'Ghaziabad': '917303489008',
+                    'Indore': '917828597277'
+                };
+                const cityNumber = locationMap[location] || '917828597277';
+
+                const orderData = {
+                    id: orderId,
+                    service: cartItems[0]?.tier || 'Cleaning Service',
+                    location,
+                    name,
+                    phone,
+                    address,
+                    date,
+                    slot,
+                    total: totalAmount,
+                    cartItems: cartItems,
+                    createdAt: bookingTimestamp
+                };
+
+                // Wait for the database write before confirming the order.
+                const orderSaveResult = await cart.saveOrderToHistory(orderData);
+                if (!orderSaveResult.saved) {
+                    console.error('Failed to save order:', orderSaveResult.error);
+                    alert(`Your order could not be saved to Supabase. ${orderSaveResult.error?.message || 'Please try again.'}`);
+                    return;
+                }
+
+                console.log('Order saved to database successfully:', orderSaveResult.data.id);
+
+                // Prepare data for Google Sheets
+                const params = new URLSearchParams();
+                params.append('orderId', orderId);
+                params.append('bookingTimestamp', bookingTimestamp);
+                params.append('name', name);
+                params.append('phone', phone);
+                params.append('address', address);
+                params.append('date', date);
+                params.append('slot', slot);
+                params.append('location', location);
+                params.append('total', totalAmount);
+                params.append('cartItems', cartSummary);
+
+                // Send to Google Sheets
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbz0k4TK7-9LwCLrGzjfBVAnatvTqDL2MKGjLcvHlZyiWPRHMPzxtMq2yNyXdP6emCAC/exec';
+
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: params
+                })
+                    .then(res => res.text())
+                    .then(data => {
+                        console.log('Response:', data);
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                    });
+
+                // Construct WhatsApp message
+                const msg = `*New DirtFree Booking*\n\n` +
+                            `*Order ID:* ${orderId}\n` +
+                            `*Location:* ${location}\n` +
+                            `*Name:* ${name}\n` +
+                            `*Phone:* +91 ${phone}\n` +
+                            `*Address:* ${address}\n` +
+                            `*Date:* ${date}\n` +
+                            `*Time Slot:* ${slot}\n\n` +
+                            `*Cart Items:*\n${cartSummary}\n` +
+                            `*Total:* Rs.${totalAmount}`;
+
+                // Open WhatsApp
+                window.open(`https://wa.me/${cityNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+
+                // Clear cart after successful order
+                setTimeout(() => {
+                    cart.clearCart();
+                    renderCartPreview();
+                    alert('Order placed successfully! Check your WhatsApp for confirmation.');
+                    window.location.href = 'index.html';
+                }, 1000);
+            };
+
+            form.addEventListener('submit', submitBooking);
+        });
+    </script>
+    <footer class="site-footer" id="contact">
+        <div class="site-footer-inner">
+            <div class="site-footer-grid">
+                <div>
+                    <a href="index.html" class="footer-brand">
+                        <span class="footer-logo-mark">
+                            <svg viewBox="0 0 100 100" aria-hidden="true">
+                                <circle cx="50" cy="50" r="48" fill="currentColor" opacity="0.18" />
+                                <path d="M50 20 L50 70 M30 70 L70 70 M35 75 L65 75 M40 80 L60 80" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                        <span class="footer-brand-name">DirtFree</span>
+                    </a>
+                    <p class="footer-copy">Professional home cleaning services for spotless, healthy spaces. Book trusted cleaners for washrooms, kitchens, flats, cars, and water tanks.</p>
+                    <div class="footer-socials">
+                        <a class="footer-social" href="https://wa.me/917828597277" aria-label="WhatsApp">WA</a>
+                        <a class="footer-social" href="tel:+917828597277" aria-label="Call">CL</a>
+                        <a class="footer-social" href="mailto:info@dirtfree.in" aria-label="Email">ML</a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="footer-title">Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#faq">FAQ</a></li>
+                        <li><a href="service.html">Book Now</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">Contact</h3>
+                    <ul class="footer-contact">
+                        <li><span class="footer-contact-icon">PH</span><a href="tel:+917828597277">+91 78285 97277</a></li>
+                        <li><span class="footer-contact-icon">WA</span><a href="https://wa.me/917828597277">WhatsApp booking support</a></li>
+                        <li><span class="footer-contact-icon">ML</span><a href="mailto:info@dirtfree.in">info@dirtfree.in</a></li>
+                        <li><span class="footer-contact-icon">IN</span><span>Ahmedabad, Betul, Chennai, Ghaziabad, Indore</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 <strong>DirtFree</strong>. All rights reserved.</span>
+                <span>Professional Cleaning Services in India</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
